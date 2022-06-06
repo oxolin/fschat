@@ -49,11 +49,12 @@ int main(int argc, char* argv[])
     int sock;
 
     sockaddr_in address;
-    string client_name = argv[1];
+    string client_name = "daun";
     dmsg = client_name + ":";
 
     //ENABLE RAW MODE
     enableRawMode();
+
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     address.sin_port = htons(8082);
@@ -70,7 +71,7 @@ int main(int argc, char* argv[])
 
 
     while(true){
-        char c;
+        char16_t c;
         read(STDIN_FILENO, &c, 1);
         if(c == 127){
             int size = send_msg.size();
@@ -82,13 +83,15 @@ int main(int argc, char* argv[])
                 string cp;
                 cp.push_back(send_msg[size-2]);
                 cp.push_back(send_msg[size-1]);
-                if((cp >= "а" && cp <= "я") || (cp >= "А" && cp <= "Я"))
+                if((cp >= "а" && cp <= "я") || (cp >= "А" && cp <= "Я") || cp == "ё" || cp == "Ё")
                     send_msg.pop_back();
             }
             send_msg.pop_back();
             continue;
         }
-        else if(c == '\n' && send_msg.size() > 0){
+        else if(c == '\n'){
+            if(send_msg.size() == 0)
+                continue;
             string data = dmsg + send_msg;
             if((len = send(sock, data.c_str(), data.size(), 0)) < 0)
                 write(STDOUT_FILENO, "Send failure", 12);
@@ -96,6 +99,14 @@ int main(int argc, char* argv[])
             write(STDOUT_FILENO, dmsg.c_str(), dmsg.size());
             send_msg.clear();
             continue;
+        }
+        else if(c==27){  //Arrows
+            read(STDIN_FILENO, &c, 1);
+            if(c==91){
+                read(STDIN_FILENO, &c, 1);
+                if(c==65||c==66||c==67||c==68)
+                    continue;
+            }
         }
 
         send_msg += c;
