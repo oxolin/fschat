@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     int sock;
 
     sockaddr_in address;
-    string client_name = "daun";
+    string client_name = argv[1];
     dmsg = client_name + ":";
 
     //ENABLE RAW MODE
